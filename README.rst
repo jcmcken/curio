@@ -2,6 +2,10 @@
 Introduction
 ============
 
+Curio is a simple, command-line driven key-value store, perfect for scripts or
+microapps that need to store a small to fair amount of unstructured data, but don't 
+really need or want a fully-fledged NoSQL solution such as Cassandra, HBase, Redis, etc.
+
 Data Structures
 ---------------
 
