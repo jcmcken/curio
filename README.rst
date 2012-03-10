@@ -1,5 +1,6 @@
+============
 Introduction
-************
+============
 
 Data Structures
 ---------------
@@ -83,7 +84,7 @@ Actions
 #######
 
 Get
-===
++++
 
 Retrieve the value of a specific key from a specific entity and print it to STDOUT. 
 
@@ -101,7 +102,7 @@ Retrieving an unset key::
 
 
 Find
-====
+++++
 
 Search all entities that match a regular expression. Search all keys that match a regular expression. Search in combination. If there are results, print the entity names and all matching keys with their values.
 
@@ -124,7 +125,7 @@ Find all keys that end in ``bar``::
     $ curio find '.*:bar$'
 
 Set
-===
++++
 
 Set the value of a specific key in a specific entity.
 
@@ -133,7 +134,7 @@ This will overwrite the contents of the given key if it already has a value::
     $ curio set some_entity:some_key some_val
 
 Delete
-======
+++++++
 
 Delete the key-value pair from the given entity. 
 
@@ -150,7 +151,7 @@ There are two ways to use ``curio`` from Python: You can either manipulate a ``c
 The second method is obviously much more prone to error.
 
 Using the Manager
-=================
+#################
 
 To use the manager, simply create a ``CurioManager`` object and pass it the directory of a ``curio`` database::
 
@@ -169,6 +170,6 @@ Now you can execute the standard actions::
 Changes to a ``curio`` database using the manager are written to disk as the action is called. There is no concept of a transaction.
 
 Without Using the Manager
-=========================
+#########################
 
 I will leave this as an exercise for the reader. Remember, ``curio`` is meant to be a very simple datastore for small applications and scripts. If you need to spend time hacking around with the backend, you might as well use an actual NoSQL server that has more robust and fully-fledged features and API. 
