@@ -2,14 +2,14 @@
 Introduction
 ============
 
-Curio is a simple, command-line driven key-value store, perfect for scripts or
+**Curio** is a simple, command-line driven key-value store, perfect for scripts or
 microapps that need to store a small to fair amount of unstructured data, but don't 
 really need or want a fully-fledged NoSQL solution such as Cassandra, HBase, Redis, etc.
 
 Data Structures
 ---------------
 
-Curio data structures can be summarized in the following way:
+**Curio** data structures can be summarized in the following way:
 
 * A database has multiple entities
 * An entity has multiple keys
@@ -37,14 +37,14 @@ You will get an 'invalid name' error if you try to use a name that violates thes
 Concurrency
 -----------
 
-Curio utilizes cross-process, entity-level write locking. In other words, if one process attempts to set an entity key at the same time as another process, it will be locked out until the first process is done.
+**Curio** utilizes cross-process, entity-level write locking. In other words, if one process attempts to set an entity key at the same time as another process, it will be locked out until the first process is done.
 
 Remember, the ``curio`` datastore is not meant to be a fully-fledged NoSQL solution, but is only intended for small applications and scripts. For those use cases, this level of concurrency should be more than adequate. 
 
 Security
 --------
 
-Discretionary access controls (e.g. UNIX file permissions) are the easiest way to secure ``curio`` data. Curio will write all data with a umask of ``0027`` by default (configurable with the ``CURIO_UMASK`` environmental variable). So by default, only the user who creates the database should be able to read or write to it. 
+Discretionary access controls (e.g. UNIX file permissions) are the easiest way to secure ``curio`` data. **Curio** will write all data with a umask of ``0027`` by default (configurable with the ``CURIO_UMASK`` environmental variable). So by default, only the user who creates the database should be able to read or write to it. 
 
 Encrypted data can be implemented fairly easily, whether through the command line or the Python API. 
 
