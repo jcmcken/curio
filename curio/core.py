@@ -109,7 +109,7 @@ class Curio(object):
         if data.keys() == ['__name__']: # i.e. no data, so delete the entity..
             os.remove(filename)
         else:
-            pickle.dump(data, open(filename, 'wb'))
+            pickle.dump(data, open(filename, 'wb'), pickle.HIGHEST_PROTOCOL)
 
     def dump(self, data, name):
         target = self.generate_target(name)
