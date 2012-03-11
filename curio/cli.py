@@ -11,7 +11,7 @@ CONFIG_DEFAULTS = {
     'entity': None, # which entity to examine
     'key': None, # which key to examine
     'value': None, # the value to set
-    'umask': 0027,
+    'umask': '0027',
 }
 ENV_MAPPING = {
     'root': 'CURIO_ROOT',
