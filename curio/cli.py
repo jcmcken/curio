@@ -10,11 +10,13 @@ CONFIG_DEFAULTS = {
     'db': None, # which database in ``root`` to use    
     'entity': None, # which entity to examine
     'key': None, # which key to examine
-    'value': None # the value to set
+    'value': None, # the value to set
+    'umask': 0027,
 }
 ENV_MAPPING = {
     'root': 'CURIO_ROOT',
     'db': 'CURIO_DB',
+    'umask': 'CURIO_UMASK',
 }
 VALID_ACTIONS = [ 'get', 'set', 'delete', 'find' ]
 VALID_NAME = re.compile(r'^[A-Za-z0-9][\w\-\.]*$')
@@ -79,6 +81,9 @@ def main(args=None):
     # validate root directory
     if not os.path.isdir(config['root']):
         cli.error("invalid root, no such directory: '%s'" % config['root'])
+
+    # set the umask
+    os.umask(config['umask'])
 
     # now set up a manager to apply the action
     database_uri = os.path.join(config['root'], config['db'])
