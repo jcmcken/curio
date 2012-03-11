@@ -83,7 +83,10 @@ def main(args=None):
         cli.error("invalid root, no such directory: '%s'" % config['root'])
 
     # set the umask
-    os.umask(config['umask'])
+    try:
+        os.umask(int(config['umask'], 8))
+    except ValueError:
+        cli.error("invalid umask '%s'" % config['umask'])
 
     # now set up a manager to apply the action
     database_uri = os.path.join(config['root'], config['db'])
