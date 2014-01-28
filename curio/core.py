@@ -10,7 +10,7 @@ except ImportError:
     # py 2.4
     from sha import new as sha
 
-from curio.exceptions import CurioLocked, UnsetKey
+from curio.exceptions import CurioLocked
 
 HEX_LOWERCASE = 'abcdef0123456789'
 
@@ -26,7 +26,17 @@ def create_hex_dirs(parent_dir):
     hex_dirs = map(lambda x: os.path.join(parent_dir, x), HEX_LOWERCASE)
     map(mkdir_p, hex_dirs)
 
-class LockManager(object):
+class BaseLockManager(object):
+    def lock(self, entity):
+        raise NotImplementedError
+
+    def unlock(self, entity):
+        raise NotImplementedError
+
+    def unlock_all(self):
+        raise NotImplementedError
+
+class LockManager(BaseLockManager):
     def __init__(self):
         self.locks = set()
 
@@ -123,11 +133,7 @@ class CurioManager(object):
 
     def get(self, entity_name, key):
         entity = self.db.load(entity_name)
-        val = entity.get(key)
-        if val:
-            return val
-        else:
-            raise UnsetKey(key)
+        return entity.get(key, None)
 
     def set(self, entity_name, key, value):
         self.db.lock_entity(entity_name)

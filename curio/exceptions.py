@@ -7,7 +7,3 @@ class NamedObjectError(RuntimeError):
 class CurioLocked(NamedObjectError):
     def __str__(self):
         return '"%s" is locked' % self.name
-
-class UnsetKey(NamedObjectError):
-    def __str__(self):
-        return 'the key "%s" has no value' % self.name

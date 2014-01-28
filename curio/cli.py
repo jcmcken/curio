@@ -3,7 +3,9 @@ from optparse import OptionParser
 import os
 import re
 from curio.core import CurioManager, CurioConfig
-from curio.exceptions import CurioLocked, UnsetKey
+from curio.exceptions import CurioLocked
+
+class InvalidCurioPath(ValueError): pass
 
 CONFIG_DEFAULTS = {
     'root': '/var/lib/curio', # where curio should look for databases
@@ -32,15 +34,19 @@ REQUIRED_NAMELIKE = {
     'delete': ['entity', 'key'],
     'find': [],
 }
+DEFAULT_CONFIG_FILE = os.path.expanduser('~/.curio')
 
-def get_cli():
+def create_parser():
     usage = 'Usage: %prog [options] <action> <uri> [extra_arguments]'
     epilog = (
     "Valid actions:\n"
     "%s" % ", ".join(VALID_ACTIONS)
     )
     cli = OptionParser(usage=usage, epilog=epilog)
-    cli.add_option('-s', '--settings', action='store_true', help="print current curio settings (without executing any actions)")
+    cli.add_option('-c', '--config', default=DEFAULT_CONFIG_FILE,
+        help='Specify a config file to use (defaults to ~/.curio)')
+    cli.add_option('-s', '--settings', action='store_true', 
+        help="print current curio settings (without executing any actions)")
     return cli
 
 def print_config_settings(config):
@@ -49,9 +55,109 @@ def print_config_settings(config):
     for key in ordering:
         print "%s = %s" % (key, config[key])
 
+class CurioCLI(object):
+    VALID_ACTIONS = [ 'get', 'set', 'delete', 'find' ]
+
+    def __init__(self):
+        self._parser = create_parser()
+
+    def run(self, argv=None):
+        opts, args = self._cli.parse_args(argv)
+        
+        self._exit_on_noop(opts, args)
+        self._exit_if_no_config(opts)
+
+        config = CurioConfig(config_file=opts.config)
+
+        if opts.settings:
+            config.print_to_screen()
+            raise SystemExit
+
+        action, entity, key, value = self._parse_action_data(args)
+        action_name = self._route_action(action)
+
+        manager = CurioManager(config.uri)
+        result = self._apply_action(manager, action_name, entity, key, value)
+
+        self._display_result(result)
+
+    def _display_result(self, action, result):
+        # if write operation, or if get returns nothing
+        if action in ['delete', 'set'] or (action == 'get' and result == None): 
+            pass # no op
+        elif action == 'get':
+            print result
+        elif action == 'find':
+            self._display_entity_result(result)
+
+    def _display_entity_result(self, result):
+        for entity, data in result.iteritems():
+            if data:
+                print entity
+            for key, value in data.iteritems():
+                print "    %s = %s" % (key, value)
+
+    def _apply_action(self, manager, action, entity, key, value=None):
+        action_func = getattr(manager, action)
+
+        # common args
+        args = [entity, key]
+
+        # ``set``-specific arg
+        if action == 'set':
+            args.append(value)
+    
+        # apply action
+        result = action_func(*args)
+
+        return result
+
+    def _parse_action_data(self, args):
+        action, entity, key, value = None, None, None, None
+        if len(args) > 0:
+            action = args.pop(0)
+        if len(args) > 0:
+            path_data = args.pop(0)
+            entity, key = self._resolve_key_path(path_data)
+        if len(args) > 0:
+            value = args.pop(0)
+        return action, entity, key, value 
+
+    def _match_action(self, action):
+        matches = [ i for i in self.VALID_ACTIONS if i.startswith(action) ]
+        if not matches:
+            raise RuntimeError, "invalid action '%s'" % action
+        elif len(matches) > 1:
+            raise RuntimeError, "vague action request, did you mean one of these -- %s -- ?" % ', '.join(matches)
+        return matches[0]
+
+    def _route_action(self, action):
+        try:
+            action = self._match_action(action)
+        except RuntimeError, e:
+            self._parser.error(e.args[0])
+        return action
+
+    def _exit_if_no_config(self, opts):
+        if not os.path.isfile(opts.config):
+            self._parser.error('no such file "%s"' % opts.config)
+
+    def _exit_on_noop(self, opts, args):
+        if not (opts.settings or args):
+            self._parser.print_help()
+            self._parser.exit(-1)
+
+    def _resolve_key_path(self, path):
+        try:
+            entity, key = path.split(':', 1)
+        except ValueError, e:
+            raise InvalidCurioPath(path)
+        return entity, key
+
+
 def main(args=None):
 
-    cli = get_cli()
+    cli = create_parser()
     opts, args = cli.parse_args(args)
     if not reduce(lambda x,y: x or y, opts.__dict__.values()) and not args:
         cli.print_help()
